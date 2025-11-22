@@ -1,0 +1,50 @@
+# 项目：OneBot 12 客户端的 Go 实现
+
+- 本仓库实现 OneBot 12 标准的机器人客户端（implementation），用于连接 OneBot 12 协议的机器人并进行通信。
+
+# OneBot 12 协议层规则
+
+- 所有协议细节以 OneBot 12 标准为唯一权威，不清楚的地方必须查阅文档，禁止凭感觉编字段名。
+- 事件基础结构遵守 OneBot Connect - 事件规范，包含字段：
+  - `id`: 事件唯一 ID，使用 UUID/ULID 字符串。
+  - `self`: 对象，形如 `{ "platform": "wechat", "user_id": "<bot_self_id>" }`。
+  - `time`: 事件产生时间，使用浮点秒时间戳。
+  - `type`: `"message"` / `"notice"` / 其它标准定义值。
+  - `detail_type` / `sub_type`: 按标准定义赋值，不随便自创枚举。
+- 对微信私聊消息：
+  - 映射为 `type = "message"`, `detail_type = "private"` 的用户消息事件。
+  - 携带 `user_id`（发送者）、必要的 `message_id`、`message` 消息段数组等。
+- 对微信群聊消息：
+  - 映射为 `type = "message"`, `detail_type = "group"` 的群消息事件。
+  - 携带 `group_id`（群唯一 ID）、`user_id`（发言人）、`message_id`、`message` 等。
+- 消息段（Message Segment）：
+  - 默认支持并优先实现标准消息段 `text`, `image`, `file`, `voice`, `video` 等。
+  - 纯文本消息段格式：`{"type": "text", "data": {"text": "..."}}`。
+  - 图片/文件类消息段字段名、结构严格按官方规范来，不参考三方实现的私货字段名。
+- 扩展字段/扩展消息段：
+  - 扩展字段命名遵守 OneBot 扩展规范：前缀小写+下划线/点，不污染标准命名空间。
+- 动作（Action）实现原则：
+  - 优先实现消息相关动作（如 `send_message`, `delete_message`, `get_message` 等）。
+  - 所有动作请求 / 响应 JSON 必须包含 `status`、`retcode`、`data` 等标准字段，且返回值类型正确。
+  - 动作的失败要返回合适的错误码和可读的错误信息，方便上游框架排查问题。
+
+# OneBot Connect 通信方式约定
+
+- 要求实现：
+  - 正向 WebSocket：通过 WebSocket 连接到 OneBot 12 协议的机器人并进行通信。
+  - 暂不实现反向 WebSocket 和 Webhook 等。
+
+# 编码风格与质量
+
+- 通用规则：
+  - 遵守 Go 命名规范
+  - 使用 Go 1.24 版本标准库
+  - websocket 使用 github.com/coder/websocket 库。
+- 日志：
+  - 为以下关键路径记录结构化日志：收到的 OneBot 动作、发出的动作响应、收到的微信消息、推送的 OneBot 事件。
+  - 禁止在库代码里使用 `fmt.Println` 调试，统一使用 `slog` 标准库。
+
+# 文档与可维护性
+
+- 所有对外暴露的类 / 函数必须写注释，说明作用、参数、返回值、异常。
+- 对涉及 OneBot 规范的实现细节，可在注释中附上简短说明和对应章节链接（例如「参见 OneBot 12 用户消息事件章节」）。
