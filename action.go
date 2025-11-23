@@ -138,10 +138,10 @@ type UploadFileResponse struct {
 
 // GetFileResponse get_file 动作的响应数据
 type GetFileResponse struct {
-	Name string `json:"name"` // 文件名
-	URL  string `json:"url"`  // 文件 URL
-	// Headers map[string]string `json:"headers,omitempty"` // 下载时需要添加的请求头
-	// Path    string            `json:"path,omitempty"`    // 文件路径（本地文件）
-	// Data    []byte            `json:"data,omitempty"`    // 文件数据（base64 编码）
-	// Sha256  string            `json:"sha256,omitempty"`  // 文件 SHA256 校验和
+	Name    string            `json:"name"`              // 文件名
+	URL     string            `json:"url"`               // 文件 URL
+	Headers map[string]string `json:"headers,omitempty"` // 下载时需要添加的请求头
+	Path    string            `json:"path,omitempty"`    // 文件路径（本地文件）
+	Data    []byte            `json:"data,omitempty"`    // 文件数据（base64 编码）
+	Sha256  string            `json:"sha256,omitempty"`  // 文件 SHA256 校验和
 }
