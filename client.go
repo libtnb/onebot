@@ -108,6 +108,9 @@ func (c *Client) connect() error {
 		return fmt.Errorf("连接 WebSocket 失败: %w", err)
 	}
 
+	// 取消读取限制
+	conn.SetReadLimit(-1)
+
 	c.conn = conn
 	c.connected.Store(true)
 	c.logger.Info("已连接到 OneBot 实现", "url", c.url)
